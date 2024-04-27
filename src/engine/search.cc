@@ -82,7 +82,7 @@ int Search::quiescent_search(int ply, int alpha, int beta, Stack *stack) {
   // early cutoff in quiescent search since we're focused on evaluating quiet positions,
   // rather than exploring all possibilities
   const int static_eval = eval::evaluate(state);
-  if (static_eval >= beta) {
+  if (static_eval >= beta || ply >= kMaxPlyFromRoot) {
     return static_eval;
   }
 
@@ -195,9 +195,9 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
       }
     }
 
-    // razoring: when evaluation is far below alpha, we assume only tactical moves can bring us back
-    // therefore, drop into quiesce and cut off if we still can't hit/raise alpha
-    if (alpha < 2000 && static_eval < alpha - 400 * depth) {
+    // razoring: drop into quiescent search when a position is badly lost and cutoff if failed low
+    // since tactical moves are most likely the only good moves
+    if (alpha < 2000 && static_eval + 400 * depth < alpha) {
       const int razoring_score = quiescent_search<node_type>(ply, alpha, beta, stack);
       if (razoring_score <= alpha) {
         return razoring_score;
@@ -207,8 +207,8 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
     // null move pruning: forfeit a move to our opponent and prune if we still have the advantage
     if (!state.move_played.is_null() && static_eval >= beta) {
       // avoid null move pruning a position with high zugzwang potential
-      const bool safe_to_nmp = (state.kingless_occupied(state.turn) & ~state.pawns(state.turn)) != 0;
-      if (safe_to_nmp) {
+      const BitBoard non_pawn_king_pieces = state.kingless_occupied(state.turn) & ~state.pawns(state.turn);
+      if (non_pawn_king_pieces) {
         transposition_table.prefetch(board_.key_after(Move::null_move()));
 
         // ensure the reduction doesn't give us a depth below 0
