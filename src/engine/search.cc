@@ -308,7 +308,9 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
     // are searched at lower depths
     if (depth > 2 && moves_seen >= 1) {
       // ensure the reduction doesn't give us a depth below 0
-      const int reduction = std::clamp<int>(lmr_table_[depth][moves_seen], 0, new_depth - 1);
+      int reduction = lmr_table_[depth][moves_seen];
+      reduction -= in_pv_node;
+      reduction = std::clamp(reduction, 0, new_depth - 1);
 
       // null window search at reduced depth to see if the move has potential
       score = -search<NodeType::kNonPV>(new_depth - reduction, ply + 1, -alpha - 1, -alpha, stack->ahead());
