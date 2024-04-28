@@ -309,7 +309,7 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
     if (depth > 2 && moves_seen >= 1) {
       // ensure the reduction doesn't give us a depth below 0
       int reduction = lmr_table_[depth][moves_seen];
-      reduction -= in_pv_node;
+      reduction += !in_pv_node;
       reduction = std::clamp(reduction, 0, new_depth - 1);
 
       // null window search at reduced depth to see if the move has potential
