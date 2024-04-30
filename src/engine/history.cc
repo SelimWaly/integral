@@ -34,9 +34,10 @@ void MoveHistory::update_counter_move(Move prev_move, Move counter) {
 const int kHistoryGravity = 16384;
 const int kHistoryScale = 300;
 const int kHistoryOffset = 300;
+const int kHistoryMaxBonus = 2000;
 
 int history_bonus(int depth) {
-  return kHistoryScale * depth - kHistoryOffset;
+  return std::min(kHistoryScale * depth - kHistoryOffset, kHistoryMaxBonus);
 }
 
 void MoveHistory::update_history(Move move, List<Move, kMaxMoves> &bad_quiets, Color turn, int depth) {
