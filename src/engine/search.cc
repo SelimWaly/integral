@@ -340,7 +340,7 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
       reduction += !in_pv_node;
       reduction -= state.in_check();
       if (is_quiet) {
-        reduction -= move_history_.get_history_score(move, state.turn) / 4681;
+        reduction -= move_history_.get_history_score(move, state.turn) / 10922;
       }
 
       // ensure the reduction doesn't give us a depth below 0
