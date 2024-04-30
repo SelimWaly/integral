@@ -337,10 +337,10 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
     const int lmr_move_threshold = 1 + in_root * 2;
     if (depth > 2 && moves_seen >= lmr_move_threshold) {
       int reduction = lmr_table_[depth][moves_seen];
-      reduction -= in_pv_node;
+      reduction += !in_pv_node;
       reduction -= state.in_check();
       if (is_quiet) {
-        reduction -= move_history_.get_history_score(move, state.turn) / 8192;
+        reduction -= move_history_.get_history_score(move, state.turn) / 4681;
       }
 
       // ensure the reduction doesn't give us a depth below 0
