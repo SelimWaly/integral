@@ -339,7 +339,9 @@ int Search::search(int depth, int ply, int alpha, int beta, Stack *stack) {
       int reduction = lmr_table_[depth][moves_seen];
       reduction += !in_pv_node;
       reduction -= state.in_check();
-      reduction -= move_history_.get_history_score(move, state.turn) / 8192;
+      if (is_quiet) {
+        reduction -= move_history_.get_history_score(move, state.turn) / 8192;
+      }
 
       // ensure the reduction doesn't give us a depth below 0
       reduction = std::clamp<int>(reduction, 0, new_depth - 1);
