@@ -122,19 +122,9 @@ void MoveHistory::update_history(Move best_move, List<Move, kMaxMoves> &bad_quie
 }
 
 void MoveHistory::clear() {
-  for (auto &scores : butterfly_history_) {
-    scores.fill(0);
-  }
-  for (auto &killers : killer_moves_) {
-    killers.fill(Move::null_move());
-  }
-  for (auto &one : cont_history_) {
-    for (auto &two : one) {
-      for (auto &three : two) {
-        three.fill(0);
-      }
-    }
-  }
+  butterfly_history_ = ButterflyHistory();
+  killer_moves_ = KillerMoves();
+  cont_history_ = ContinuationHistory();
 }
 
 void MoveHistory::clear_killers(int ply) {

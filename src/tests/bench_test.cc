@@ -67,6 +67,7 @@ void bench_suite(Board &board, Search &search, int depth) {
     depth = kDefaultBenchDepth;
   }
 
+  Board old_board = board;
   U64 nodes = 0, elapsed = 0;
 
   for (const auto &position : kBenchFens) {
@@ -84,6 +85,8 @@ void bench_suite(Board &board, Search &search, int depth) {
                            nodes,
                            static_cast<U64>(nodes * 1000.0 / std::max(elapsed, 1ULL)))
             << std::endl;
+
+  board = old_board;
 }
 
 }  // namespace tests
