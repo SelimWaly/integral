@@ -136,6 +136,7 @@ Move &MovePicker::selection_sort(List<ScoredMove, kMaxMoves> &move_list, const i
 
 template <MoveType move_type>
 void MovePicker::generate_and_score_moves(List<ScoredMove, kMaxMoves> &list) {
+  assert(search_stack_);
   const auto &killers = move_history_.get_killers(search_stack_->ply);
   auto moves = move_gen::generate_moves(move_type, board_);
 

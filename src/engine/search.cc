@@ -8,7 +8,7 @@
 #include "transpo.h"
 #include "history.h"
 
-Search::Search(Board &board) : board_(board), sel_depth_(0), searching(false), move_history_(board_) {
+Search::Search(Board &board) : board_(board), sel_depth_(0), searching(false), move_history_(board_.get_state()) {
   const double kBaseReduction = 0.39;
   const double kDivisor = 2.36;
 
@@ -111,6 +111,7 @@ int Search::quiescent_search(int ply, int alpha, int beta, SearchStack *stack) {
   }
 
   const auto &state = board_.get_state();
+  stack->ply = ply;
 
   // a principal variation (pv) node is a node that falls between the [alpha, beta] window and one which most child
   // moves are searched during the pv search, we attempt to guess which moves will be pv or non-pv nodes and re-search
@@ -197,6 +198,7 @@ int Search::quiescent_search(int ply, int alpha, int beta, SearchStack *stack) {
 template <NodeType node_type>
 int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) {
   const auto &state = board_.get_state();
+  stack->ply = ply;
 
   // ensure we never fall into quiescent search when the side to move is in check
   if (state.in_check()) {
@@ -217,7 +219,7 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
   const bool in_root = ply == 0;
 
   if (!in_root) {
-    sel_depth_ = std::max(sel_depth_, stack->ply = ply);
+    sel_depth_ = std::max(sel_depth_, ply);
 
     if (board_.is_draw(ply)) {
       return eval::kDrawScore;
@@ -321,10 +323,13 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
       stack->ahead()->pv.clear();
     }
 
-    const U64 prev_nodes_searched = time_mgmt_.get_nodes_searched();
+    // set the currently searched move in the stack for continuation history
+    stack->move = move;
+    stack->moved_piece = state.get_piece_type(move.get_from());
 
     board_.make_move(move);
 
+    const U64 prev_nodes_searched = time_mgmt_.get_nodes_searched();
     const int new_depth = depth - 1;
 
     // principal variation search (pvs)

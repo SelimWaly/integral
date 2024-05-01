@@ -65,12 +65,25 @@ enum class SearchType {
 };
 
 struct SearchStack {
-  [[maybe_unused]] int ply;
+  // the number of ply from root
+  int ply;
+  // evaluation of the position at this ply
   int static_eval;
+  // the best moves following down this ply
   PVLine pv;
+  // the move with the best score
   Move best_move;
+  // the currently searched move at this ply
+  Move move;
+  // the piece that is currently being moved
+  PieceType moved_piece;
 
-  SearchStack() : static_eval(kScoreNone), ply(0), best_move(Move::null_move()) {}
+  SearchStack()
+      : static_eval(kScoreNone),
+        ply(0),
+        best_move(Move::null_move()),
+        move(Move::null_move()),
+        moved_piece(PieceType::kNone) {}
 
   SearchStack *ahead(int amount = 1) {
     return this + amount;

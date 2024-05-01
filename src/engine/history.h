@@ -15,7 +15,7 @@ using ContinuationHistory = std::array<std::array<std::array<std::array<short, 6
 
 class MoveHistory {
  public:
-  explicit MoveHistory(Board &board_);
+  explicit MoveHistory(const BoardState &state);
 
   int get_history_score(Move move, Color turn) noexcept;
 
@@ -34,7 +34,7 @@ class MoveHistory {
   void clear_killers(int ply);
 
  private:
-  Board &board_;
+  const BoardState &state_;
   KillerMoves killer_moves_;
   ButterflyHistory butterfly_history_;
   ContinuationHistory cont_history_;

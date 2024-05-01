@@ -209,7 +209,7 @@ class Board {
   }
 
   inline BoardState &get_prev_state(int plies_ago = 1) {
-    return history_[history_.size() - 1 - plies_ago];
+    return plies_ago == 1 ? state_ : history_[history_.size() + 1 - plies_ago];
   }
 
   void set_from_fen(const std::string &fen_str);
