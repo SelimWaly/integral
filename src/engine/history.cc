@@ -87,7 +87,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
     // apply a linear dampening to the bonus (penalty here) as the depth increases
     update_entry(1, bad_quiet, penalty);
     update_entry(2, bad_quiet, penalty);
-    update_entry(4, bad_quiet, penalty);
+    // update_entry(4, bad_quiet, penalty);
   }
 }
 
