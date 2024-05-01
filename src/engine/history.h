@@ -11,7 +11,7 @@ constexpr int kFromToCombinations = Square::kSquareCount * Square::kSquareCount;
 
 using KillerMoves = std::array<std::array<Move, 2>, kMaxPlyFromRoot>;
 using ButterflyHistory = std::array<std::array<short, kFromToCombinations>, 2>;
-using ContinuationHistory = std::array<std::array<std::array<short, Square::kSquareCount>, PieceType::kNumTypes * 2>, kMaxPlyFromRoot>;
+using ContinuationHistory = std::array<std::array<std::array<std::array<short, 64>, 6>, 64>, 6>;
 
 class MoveHistory {
  public:
@@ -28,8 +28,6 @@ class MoveHistory {
   void update_cont_history(Move best_move, List<Move, kMaxMoves> &bad_quiets, int depth, SearchStack *stack);
 
   void update_history(Move best_move, List<Move, kMaxMoves> &bad_quiets, Color turn, int depth);
-
-  void decay();
 
   void clear();
 

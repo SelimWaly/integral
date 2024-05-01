@@ -23,8 +23,6 @@ template <SearchType type>
 void Search::iterative_deepening() {
   constexpr bool print_info = type == SearchType::kRegular;
 
-  move_history_.decay();
-
   // the starting ply from a root position is always zero
   const auto root_stack = &stack_[0];
   root_stack->best_move = Move::null_move();
@@ -382,6 +380,7 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
 
       if (score > alpha) {
         stack->best_move = best_move = move;
+        stack->moved_piece = state.get_piece_type(move.get_from());
 
         // only update the pv line if this node was expected to be in the pv
         if (in_pv_node) {

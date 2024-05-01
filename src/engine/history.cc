@@ -19,6 +19,11 @@ inline int move_index(Move move) {
   return move.get_from() * Square::kSquareCount + move.get_to();
 }
 
+inline int piece_idx(Move move, const BoardState &state) {
+  const auto piece = state.get_piece_type(move.get_from());
+  return piece;
+}
+
 inline int move_index(PieceType piece, Move move) {
   return piece * kFromToCombinations + move.get_from() * Square::kSquareCount + move.get_to();
 }
@@ -31,10 +36,11 @@ int MoveHistory::get_history_score(Move move, Color turn) noexcept {
 }
 
 int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *stack) noexcept {
-  const auto piece = state_.get_piece_type(move.get_from());
-  return stack->ply >= plies_ago
-             ? cont_history_[stack->ply - plies_ago][piece][move.get_to()]
-             : 0;
+  if (stack->ply >= plies_ago && stack->behind(plies_ago)->best_move) {
+    const auto prev_move = stack->behind(plies_ago)->best_move;
+    return cont_history_[stack->behind(plies_ago)->moved_piece][prev_move.get_to()][piece_idx(move, state_)][move.get_to()];
+  }
+  return 0;
 }
 
 std::array<Move, 2> &MoveHistory::get_killers(int ply) {
@@ -50,18 +56,18 @@ void MoveHistory::update_killer_move(Move move, int ply) {
 }
 
 void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad_quiets, int depth, SearchStack *stack) {
-  const auto update_cont_hist_entry = [&stack, this](int plies_ago, Move move, int bonus) {
-    const auto piece = state_.get_piece_type(move.get_from());
+  const auto update_entry = [&stack, this](int plies_ago, Move move, int bonus) {
     if (stack->ply >= plies_ago && stack->behind(plies_ago)->best_move) {
-      short &score = cont_history_[stack->ply - plies_ago][piece][move.get_to()];
+      const auto prev_move = stack->behind(plies_ago)->best_move;
+      short &score = cont_history_[stack->behind(plies_ago)->moved_piece][prev_move.get_to()][piece_idx(move, state_)][move.get_to()];
       score += scale_bonus(score, bonus);
     }
   };
 
   const int bonus = history_bonus(depth);
-  update_cont_hist_entry(1, best_move, bonus);
-  update_cont_hist_entry(2, best_move, bonus);
-  update_cont_hist_entry(4, best_move, bonus);
+  update_entry(1, best_move, bonus);
+  update_entry(2, best_move, bonus);
+  update_entry(4, best_move, bonus);
 
   // lower the score of the quiet moves that failed to raise alpha
   // a good side effect of this is that moves that caused a beta cutoff earlier and were awarded a bonus but no longer
@@ -71,9 +77,9 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
     const auto &bad_quiet = bad_quiets[i];
 
     // apply a linear dampening to the bonus (penalty here) as the depth increases
-    update_cont_hist_entry(1, bad_quiet, penalty);
-    update_cont_hist_entry(2, bad_quiet, penalty);
-    update_cont_hist_entry(4, bad_quiet, penalty);
+    update_entry(1, bad_quiet, penalty);
+    update_entry(2, bad_quiet, penalty);
+    update_entry(4, bad_quiet, penalty);
   }
 }
 
@@ -97,12 +103,6 @@ void MoveHistory::update_history(Move best_move, List<Move, kMaxMoves> &bad_quie
   }
 }
 
-void MoveHistory::decay() {
-  for (auto &killers : killer_moves_) {
-    killers.fill(Move::null_move());
-  }
-}
-
 void MoveHistory::clear() {
   for (auto &scores : butterfly_history_) {
     scores.fill(0);
@@ -110,9 +110,11 @@ void MoveHistory::clear() {
   for (auto &killers : killer_moves_) {
     killers.fill(Move::null_move());
   }
-  for (auto &counters : cont_history_) {
-    for (auto &pieces : counters) {
-      pieces.fill(0);
+  for (auto &one : cont_history_) {
+    for (auto &two : one) {
+      for (auto &three : two) {
+        three.fill(0);
+      }
     }
   }
 }
