@@ -72,8 +72,8 @@ void bench_suite(Board &board, Search &search, int depth) {
 
   for (const auto &position : kBenchFens) {
     board.set_from_fen(position);
-    search.new_game();
 
+    search.new_game();
     search.bench(depth);
 
     const auto time_mgmt = search.get_time_management();

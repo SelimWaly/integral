@@ -39,7 +39,7 @@ int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *s
   if (stack->ply >= plies_ago) {
     auto old_stack = stack->behind(plies_ago);
 
-    if (old_stack) {
+    if (old_stack && old_stack->best_move) {
       const int prev_to = old_stack->best_move.get_to();
       const int to = move.get_to();
 
@@ -69,7 +69,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
     if (stack->ply >= plies_ago) {
       auto old_stack = stack->behind(plies_ago);
 
-      if (old_stack) {
+      if (old_stack && old_stack->best_move) {
         const int prev_to = old_stack->best_move.get_to();
         const int to = move.get_to();
 
@@ -122,9 +122,19 @@ void MoveHistory::update_history(Move best_move, List<Move, kMaxMoves> &bad_quie
 }
 
 void MoveHistory::clear() {
-  butterfly_history_ = ButterflyHistory();
-  killer_moves_ = KillerMoves();
-  cont_history_ = ContinuationHistory();
+  for (auto &scores : butterfly_history_) {
+    scores.fill(0);
+  }
+  for (auto &killers : killer_moves_) {
+    killers.fill(Move::null_move());
+  }
+  for (auto &one : cont_history_) {
+    for (auto &two : one) {
+      for (auto &three : two) {
+        three.fill(0);
+      }
+    }
+  }
 }
 
 void MoveHistory::clear_killers(int ply) {

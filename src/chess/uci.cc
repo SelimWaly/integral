@@ -99,6 +99,7 @@ void accept_commands(int arg_count, char **args) {
   board.set_from_fen(fen::kStartFen);
 
   Search search(board);
+  search.new_game();
 
   if (args[1] && std::string(args[1]) == "bench") {
     const int depth = arg_count == 3 ? std::stoi(args[2]) : 0;
@@ -108,7 +109,6 @@ void accept_commands(int arg_count, char **args) {
 
   print_ascii_logo();
   std::cout << std::format("    v{}, written by {}\n", kEngineVersion, kEngineAuthor) << std::endl;
-
 
   std::string input_line;
   while (input_line != "quit") {
