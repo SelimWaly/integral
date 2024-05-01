@@ -2,8 +2,8 @@
 #define INTEGRAL_SEARCH_H_
 
 #include "../chess/board.h"
-#include "eval.h"
 #include "history.h"
+#include "eval.h"
 #include "time_mgmt.h"
 
 const int kMaxSearchDepth = 100;
@@ -64,25 +64,25 @@ enum class SearchType {
   kBench
 };
 
+struct SearchStack {
+  [[maybe_unused]] int ply;
+  int static_eval;
+  PVLine pv;
+  Move best_move;
+
+  SearchStack() : static_eval(kScoreNone), ply(0), best_move(Move::null_move()) {}
+
+  SearchStack *ahead(int amount = 1) {
+    return this + amount;
+  }
+
+  SearchStack *behind(int amount = 1) {
+    return this - amount;
+  }
+};
+
 class Search {
  public:
-  struct Stack {
-    [[maybe_unused]] int ply;
-    int static_eval;
-    PVLine pv;
-    Move best_move;
-
-    Stack() : static_eval(kScoreNone), ply(0), best_move(Move::null_move()) {}
-
-    Stack *ahead(int amount = 1) {
-      return this + amount;
-    }
-
-    Stack *behind(int amount = 1) {
-      return this - amount;
-    }
-  };
-
   explicit Search(Board &board);
 
   void start(TimeManagement::Config &time_config);
@@ -102,16 +102,16 @@ class Search {
   void iterative_deepening();
 
   template<NodeType node_type>
-  int quiescent_search(int ply, int alpha, int beta, Stack *stack);
+  int quiescent_search(int ply, int alpha, int beta, SearchStack *stack);
 
   template<NodeType node_type>
-  int search(int depth, int ply, int alpha, int beta, Stack *stack);
+  int search(int depth, int ply, int alpha, int beta, SearchStack *stack);
 
  private:
   Board &board_;
   TimeManagement time_mgmt_;
   MoveHistory move_history_;
-  std::array<Stack, kMaxPlyFromRoot + 1> stack_;
+  std::array<SearchStack, kMaxPlyFromRoot + 1> stack_;
   std::array<std::array<int, kMaxMoves>, kMaxSearchDepth + 1> lmr_table_;
   int sel_depth_;
   std::atomic_bool searching;

@@ -62,15 +62,13 @@ const std::array kBenchFens = {
 
 const int kDefaultBenchDepth = 10;
 
-void bench_suite(int depth) {
+void bench_suite(Board &board, Search &search, int depth) {
   if (depth == 0) {
     depth = kDefaultBenchDepth;
   }
 
   U64 nodes = 0, elapsed = 0;
 
-  Board board;
-  Search search(board);
   for (const auto &position : kBenchFens) {
     board.set_from_fen(position);
     search.new_game();

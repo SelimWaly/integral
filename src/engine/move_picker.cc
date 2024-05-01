@@ -12,7 +12,7 @@ const std::array<std::array<int, PieceType::kNumTypes>, PieceType::kNumTypes> kM
 // clang-format on
 
 MovePicker::MovePicker(
-    MovePickerType type, Board &board, Move tt_move, MoveHistory &move_history, Search::Stack *search_stack)
+    MovePickerType type, Board &board, Move tt_move, MoveHistory &move_history, SearchStack *search_stack)
     : type_(type),
       board_(board),
       tt_move_(tt_move),
@@ -175,5 +175,10 @@ int MovePicker::score_move(Move &move) {
 
   // order moves that caused a beta cutoff by their own history score
   // the higher the depth this move caused a cutoff the more likely it move will be ordered first
-  return move_history_.get_history_score(move, state.turn);
+  int history = move_history_.get_history_score(move, state.turn);
+  history += move_history_.get_cont_history_score(move, 1, search_stack_);
+  history += move_history_.get_cont_history_score(move, 2, search_stack_);
+  history += move_history_.get_cont_history_score(move, 4, search_stack_);
+
+  return history;
 }
