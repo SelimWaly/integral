@@ -75,7 +75,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
   const int bonus = history_bonus(depth);
   update_entry(1, best_move, bonus);
   update_entry(2, best_move, bonus);
-  update_entry(4, best_move, bonus);
+  //update_entry(4, best_move, bonus);
 
   // lower the score of the quiet moves that failed to raise alpha
   // a good side effect of this is that moves that caused a beta cutoff earlier and were awarded a bonus but no longer
