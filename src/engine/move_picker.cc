@@ -178,7 +178,6 @@ int MovePicker::score_move(Move &move) {
   int history = move_history_.get_history_score(move, state.turn);
   history += move_history_.get_cont_history_score(move, 1, search_stack_);
   history += move_history_.get_cont_history_score(move, 2, search_stack_);
-  history += move_history_.get_cont_history_score(move, 4, search_stack_);
 
   return history;
 }
