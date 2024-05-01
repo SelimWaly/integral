@@ -41,7 +41,7 @@ int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *s
 
     if (old_stack) {
       const int prev_to = old_stack->best_move.get_to();
-      const int to = old_stack->best_move.get_to();
+      const int to = move.get_to();
 
       const PieceType prev_piece = old_stack->moved_piece;
       const PieceType piece = state_.get_piece_type(move.get_from());
@@ -71,7 +71,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
 
       if (old_stack) {
         const int prev_to = old_stack->best_move.get_to();
-        const int to = old_stack->best_move.get_to();
+        const int to = move.get_to();
 
         const PieceType prev_piece = old_stack->moved_piece;
         const PieceType piece = state_.get_piece_type(move.get_from());
