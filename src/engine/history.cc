@@ -33,8 +33,8 @@ int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *s
       const int prev_to = old_stack->move.get_to();
       const int to = move.get_to();
 
-      const PieceType prev_piece = old_stack->moved_piece;
-      const PieceType piece = state_.get_piece_type(move.get_from());
+      const int prev_piece = old_stack->moved_piece;
+      const int piece = state_.get_piece_and_color(move.get_from());
 
       return cont_history_[prev_piece][prev_to][piece][to];
     }
@@ -63,8 +63,8 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
         const int prev_to = old_stack->move.get_to();
         const int to = move.get_to();
 
-        const PieceType prev_piece = old_stack->moved_piece;
-        const PieceType piece = state_.get_piece_type(move.get_from());
+        const int prev_piece = old_stack->moved_piece;
+        const int piece = state_.get_piece_and_color(move.get_from());
 
         short &score = cont_history_[prev_piece][prev_to][piece][to];
         score += scale_bonus(score, bonus);
@@ -75,7 +75,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
   const int bonus = history_bonus(depth);
   update_entry(1, best_move, bonus);
   update_entry(2, best_move, bonus);
-  //update_entry(4, best_move, bonus);
+  update_entry(4, best_move, bonus);
 
   // lower the score of the quiet moves that failed to raise alpha
   // a good side effect of this is that moves that caused a beta cutoff earlier and were awarded a bonus but no longer
@@ -87,7 +87,7 @@ void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad
     // apply a linear dampening to the bonus (penalty here) as the depth increases
     update_entry(1, bad_quiet, penalty);
     update_entry(2, bad_quiet, penalty);
-    // update_entry(4, bad_quiet, penalty);
+    update_entry(4, bad_quiet, penalty);
   }
 }
 

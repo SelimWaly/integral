@@ -326,7 +326,7 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
 
     // set the currently searched move in the stack for continuation history
     stack->move = move;
-    stack->moved_piece = state.get_piece_type(move.get_from());
+    stack->moved_piece = state.get_piece_and_color(move.get_from());
 
     board_.make_move(move);
 

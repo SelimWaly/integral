@@ -75,8 +75,8 @@ struct SearchStack {
   Move best_move;
   // the currently searched move at this ply
   Move move;
-  // the piece that is currently being moved
-  PieceType moved_piece;
+  // the (colored) piece that is currently being moved
+  int moved_piece;
 
   SearchStack()
       : static_eval(kScoreNone),

@@ -18,15 +18,12 @@ class CastleRights {
   static constexpr int kKingsideIndex = 0;
   static constexpr int kQueensideIndex = 1;
 
-  static constexpr std::array<std::array<Square, 2>, 2> kRookSquares = {{
-    {Square::kH8, Square::kA8},
-    {Square::kH1, Square::kA1}
-  }};
+  static constexpr std::array<std::array<Square, 2>, 2> kRookSquares = {
+      {{Square::kH8, Square::kA8}, {Square::kH1, Square::kA1}}};
 
-  static constexpr std::array<std::array<U8, 2>, 2> kMasks = {{
-      {CastleRightMasks::kWhiteKingside, CastleRightMasks::kWhiteQueenside},
-      {CastleRightMasks::kBlackKingside, CastleRightMasks::kBlackQueenside}
-  }};
+  static constexpr std::array<std::array<U8, 2>, 2> kMasks = {
+      {{CastleRightMasks::kWhiteKingside, CastleRightMasks::kWhiteQueenside},
+       {CastleRightMasks::kBlackKingside, CastleRightMasks::kBlackQueenside}}};
 
   CastleRights() : rights_(0) {}
 
@@ -113,6 +110,10 @@ struct BoardState {
 
   [[nodiscard]] constexpr inline PieceType get_piece_type(const U8 &square) const {
     return piece_on_square[square];
+  }
+
+  [[nodiscard]] constexpr inline int get_piece_and_color(const U8 &square) const {
+    return piece_on_square[square] + PieceType::kNumTypes * static_cast<int>(get_piece_color(square));
   }
 
   [[nodiscard]] constexpr inline bool piece_exists(Square square) const {
@@ -245,4 +246,4 @@ class Board {
   List<BoardState, kMaxGamePly> history_;
 };
 
-#endif // INTEGRAL_BOARD_H_
+#endif  // INTEGRAL_BOARD_H_
