@@ -5,10 +5,9 @@
 const int kHistoryGravity = 16384;
 const int kHistoryScale = 300;
 const int kHistoryOffset = 300;
-const int kHistoryMaxBonus = 2000;
 
 int history_bonus(int depth) {
-  return std::min(kHistoryScale * depth - kHistoryOffset, kHistoryMaxBonus);
+  return kHistoryScale * depth - kHistoryOffset;
 }
 
 int scale_bonus(int score, int bonus) {
@@ -17,15 +16,6 @@ int scale_bonus(int score, int bonus) {
 
 inline int move_index(Move move) {
   return move.get_from() * Square::kSquareCount + move.get_to();
-}
-
-inline int piece_idx(Move move, const BoardState &state) {
-  const auto piece = state.get_piece_type(move.get_from());
-  return piece;
-}
-
-inline int move_index(PieceType piece, Move move) {
-  return piece * kFromToCombinations + move.get_from() * Square::kSquareCount + move.get_to();
 }
 
 MoveHistory::MoveHistory(const BoardState &state)

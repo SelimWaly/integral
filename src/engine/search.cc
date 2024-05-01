@@ -470,7 +470,7 @@ const TimeManagement &Search::get_time_management() {
 }
 
 void Search::new_game() {
-  std::ranges::fill(stack_, SearchStack{});
+  std::ranges::fill(stack_, SearchStack());
   transposition_table.clear();
   move_history_.clear();
 }
