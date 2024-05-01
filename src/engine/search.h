@@ -71,7 +71,7 @@ struct SearchStack {
   Move best_move;
   PieceType moved_piece;
 
-  SearchStack() : static_eval(kScoreNone), ply(0), best_move(Move::null_move()), moved_piece(PieceType::kNumTypes) {}
+  SearchStack() : static_eval(kScoreNone), ply(0), best_move(Move::null_move()), moved_piece(PieceType::kNone) {}
 
   SearchStack *ahead(int amount = 1) {
     return this + amount;

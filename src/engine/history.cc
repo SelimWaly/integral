@@ -36,9 +36,18 @@ int MoveHistory::get_history_score(Move move, Color turn) noexcept {
 }
 
 int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *stack) noexcept {
-  if (stack->ply >= plies_ago && stack->behind(plies_ago)->best_move) {
-    const auto prev_move = stack->behind(plies_ago)->best_move;
-    return cont_history_[stack->behind(plies_ago)->moved_piece][prev_move.get_to()][piece_idx(move, state_)][move.get_to()];
+  if (stack->ply >= plies_ago) {
+    auto old_stack = stack->behind(plies_ago);
+
+    if (old_stack) {
+      const int prev_to = old_stack->best_move.get_to();
+      const int to = old_stack->best_move.get_to();
+
+      const PieceType prev_piece = old_stack->moved_piece;
+      const PieceType piece = state_.get_piece_type(move.get_from());
+
+      return cont_history_[prev_piece][prev_to][piece][to];
+    }
   }
   return 0;
 }
@@ -57,10 +66,19 @@ void MoveHistory::update_killer_move(Move move, int ply) {
 
 void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad_quiets, int depth, SearchStack *stack) {
   const auto update_entry = [&stack, this](int plies_ago, Move move, int bonus) {
-    if (stack->ply >= plies_ago && stack->behind(plies_ago)->best_move) {
-      const auto prev_move = stack->behind(plies_ago)->best_move;
-      short &score = cont_history_[stack->behind(plies_ago)->moved_piece][prev_move.get_to()][piece_idx(move, state_)][move.get_to()];
-      score += scale_bonus(score, bonus);
+    if (stack->ply >= plies_ago) {
+      auto old_stack = stack->behind(plies_ago);
+
+      if (old_stack) {
+        const int prev_to = old_stack->best_move.get_to();
+        const int to = old_stack->best_move.get_to();
+
+        const PieceType prev_piece = old_stack->moved_piece;
+        const PieceType piece = state_.get_piece_type(move.get_from());
+
+        short &score = cont_history_[prev_piece][prev_to][piece][to];
+        score += scale_bonus(score, bonus);
+      }
     }
   };
 
