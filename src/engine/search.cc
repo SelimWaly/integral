@@ -260,6 +260,7 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
       const BitBoard non_pawn_king_pieces = state.kingless_occupied(state.turn) & ~state.pawns(state.turn);
       if (non_pawn_king_pieces) {
         transposition_table.prefetch(board_.key_after(Move::null_move()));
+        stack->move = Move::null_move();
 
         // ensure the reduction doesn't give us a depth below 0
         const int reduction = std::clamp<int>(depth / 4 + 4, 0, depth);
