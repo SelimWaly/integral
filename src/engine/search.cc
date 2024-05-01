@@ -8,7 +8,7 @@
 #include "transpo.h"
 #include "history.h"
 
-Search::Search(Board &board) : board_(board), sel_depth_(0), searching(false), move_history_(board_.get_state()) {
+Search::Search(Board &board) : board_(board), sel_depth_(0), searching(false), move_history_(board_) {
   const double kBaseReduction = 0.39;
   const double kDivisor = 2.36;
 
@@ -380,7 +380,6 @@ int Search::search(int depth, int ply, int alpha, int beta, SearchStack *stack) 
 
       if (score > alpha) {
         stack->best_move = best_move = move;
-        stack->moved_piece = state.get_piece_type(move.get_from());
 
         // only update the pv line if this node was expected to be in the pv
         if (in_pv_node) {

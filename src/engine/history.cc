@@ -18,8 +18,7 @@ inline int move_index(Move move) {
   return move.get_from() * Square::kSquareCount + move.get_to();
 }
 
-MoveHistory::MoveHistory(const BoardState &state)
-    : state_(state), killer_moves_({}), cont_history_({}), butterfly_history_({}) {}
+MoveHistory::MoveHistory(Board &board) : board_(board), killer_moves_({}), cont_history_({}), butterfly_history_({}) {}
 
 int MoveHistory::get_history_score(Move move, Color turn) noexcept {
   return butterfly_history_[turn][move_index(move)];
@@ -27,17 +26,16 @@ int MoveHistory::get_history_score(Move move, Color turn) noexcept {
 
 int MoveHistory::get_cont_history_score(Move move, int plies_ago, SearchStack *stack) noexcept {
   if (stack->ply >= plies_ago) {
-    auto old_stack = stack->behind(plies_ago);
+    const auto &state = board_.get_state();
+    const auto &old_state = board_.get_prev_state(plies_ago);
 
-    if (old_stack && old_stack->best_move) {
-      const int prev_to = old_stack->best_move.get_to();
-      const int to = move.get_to();
+    const int prev_to = old_state.move_played.get_to();
+    const int to = move.get_to();
 
-      const PieceType prev_piece = old_stack->moved_piece;
-      const PieceType piece = state_.get_piece_type(move.get_from());
+    const PieceType prev_piece = old_state.get_piece_type(old_state.move_played.get_from());
+    const PieceType piece = state.get_piece_type(move.get_from());
 
-      return cont_history_[prev_piece][prev_to][piece][to];
-    }
+    return cont_history_[prev_piece][prev_to][piece][to];
   }
   return 0;
 }
@@ -57,18 +55,16 @@ void MoveHistory::update_killer_move(Move move, int ply) {
 void MoveHistory::update_cont_history(Move best_move, List<Move, kMaxMoves> &bad_quiets, int depth, SearchStack *stack) {
   const auto update_entry = [&stack, this](int plies_ago, Move move, int bonus) {
     if (stack->ply >= plies_ago) {
-      auto old_stack = stack->behind(plies_ago);
+      const auto &state = board_.get_state();
+      const auto &old_state = board_.get_prev_state(plies_ago);
 
-      if (old_stack && old_stack->best_move) {
-        const int prev_to = old_stack->best_move.get_to();
-        const int to = move.get_to();
+      const int prev_to = old_state.move_played.get_to();
+      const int to = move.get_to();
 
-        const PieceType prev_piece = old_stack->moved_piece;
-        const PieceType piece = state_.get_piece_type(move.get_from());
+      const PieceType prev_piece = old_state.get_piece_type(old_state.move_played.get_from());
+      const PieceType piece = state.get_piece_type(move.get_from());
 
-        short &score = cont_history_[prev_piece][prev_to][piece][to];
-        score += scale_bonus(score, bonus);
-      }
+      return cont_history_[prev_piece][prev_to][piece][to];
     }
   };
 
