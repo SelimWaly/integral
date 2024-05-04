@@ -307,7 +307,7 @@ int Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     // fall below beta anytime soon the margin for this comparison is scaled
     // based on how many ply we have left to search
     if (depth <= 6 && eval < kMateScore - kMaxPlyFromRoot) {
-      const int futility_margin = (depth - improving) * 75;
+      const int futility_margin = (depth - improving) * 110;
       if (eval - futility_margin >= beta) {
         return eval;
       }
