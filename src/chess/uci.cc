@@ -10,6 +10,26 @@
 
 namespace uci {
 
+std::unordered_map<std::string_view, Option> options;
+
+template <typename T>
+Option &GetOption(std::string_view option) {
+  return options[option];
+}
+
+void CreateOption(std::string_view name,
+                  OptionType type,
+                  const std::any &value,
+                  int min = 0,
+                  int max = 0) {
+  options[name] = Option(type, value, min, max);
+}
+
+void InitializeOptions() {
+  CreateOption("Hash", OptionType::kSpin, 64, 0, 1024);
+  CreateOption("Threads", OptionType::kSpin, 1, 1, 1);
+}
+
 void Position(Board &board, std::stringstream &input_stream) {
   std::string position_type;
   input_stream >> position_type;
@@ -25,7 +45,8 @@ void Position(Board &board, std::stringstream &input_stream) {
   board.SetFromFen(position_fen);
 
   std::string dummy;
-  while (input_stream >> dummy && dummy != "moves");
+  while (input_stream >> dummy && dummy != "moves")
+    ;
 
   std::string move_input;
   while (input_stream >> move_input) {
@@ -90,6 +111,8 @@ void Test(Board &board, std::stringstream &input_stream) {
 
 void AcceptCommands(int arg_count, char **args) {
   move_gen::InitializeAttacks();
+
+  InitializeOptions();
 
   const int kTTMbSize = 64;
   transposition_table.Resize(kTTMbSize);

@@ -284,13 +284,15 @@ int Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
   bool improving = false;
 
   if (!state.InCheck()) {
-    stack->static_eval = eval::Evaluate(state);
+    if (tt_hit) {
+      stack->static_eval = eval =
+          tt_entry.score != kScoreNone ? tt_entry.score : eval::Evaluate(state);
 
-    // Adjust eval depending on if we can use the score stored in the TT
-    if (tt_hit && can_use_tt_eval) {
-      eval = transposition_table.CorrectScore(tt_entry.score, stack->ply);
+      if (can_use_tt_eval) {
+        eval = transposition_table.CorrectScore(tt_entry.score, stack->ply);
+      }
     } else {
-      eval = stack->static_eval;
+      stack->static_eval = eval = eval::Evaluate(state);
     }
 
     if (stack->ply >= 2 && (stack - 2)->static_eval != kScoreNone) {
