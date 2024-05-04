@@ -276,19 +276,21 @@ int Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     return transposition_table.CorrectScore(tt_entry.score, stack->ply);
   }
 
+  // An approximation of the current evaluation at this node
   Score eval;
-
+  // This condition is dependent on if the side to move's static evaluation has
+  // improved in the past two or four plies. It also used as a metric for
+  // adjusting pruning thresholds.
   bool improving = false;
-  if (!state.InCheck()) {
-    if (tt_hit) {
-      stack->static_eval = eval =
-          tt_entry.score != kScoreNone ? tt_entry.score : eval::Evaluate(state);
 
-      if (can_use_tt_eval) {
-        eval = transposition_table.CorrectScore(tt_entry.score, stack->ply);
-      }
+  if (!state.InCheck()) {
+    stack->static_eval = eval::Evaluate(state);
+
+    // Adjust eval depending on if we can use the score stored in the TT
+    if (tt_hit && can_use_tt_eval) {
+      eval = transposition_table.CorrectScore(tt_entry.score, stack->ply);
     } else {
-      stack->static_eval = eval = eval::Evaluate(state);
+      eval = stack->static_eval;
     }
 
     if (stack->ply >= 2 && (stack - 2)->static_eval != kScoreNone) {
@@ -307,7 +309,7 @@ int Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     // fall below beta anytime soon the margin for this comparison is scaled
     // based on how many ply we have left to search
     if (depth <= 6 && eval < kMateScore - kMaxPlyFromRoot) {
-      const int futility_margin = (depth - improving) * 110;
+      const int futility_margin = (depth - improving) * 90;
       if (eval - futility_margin >= beta) {
         return eval;
       }
