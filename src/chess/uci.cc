@@ -69,7 +69,6 @@ void Go(Board &board, Search &search, std::stringstream &input_stream) {
       input_stream >> depth;
       tests::Perft(board, depth);
       return;
-    } else if (option == "setoption") {
     }
   }
 
