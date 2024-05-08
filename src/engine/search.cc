@@ -36,8 +36,8 @@ void Search::IterativeDeepening() {
 
   move_history_.Decay();
 
-  // The starting ply from a root position is always zero
-  const auto root_stack = &stack_[0];
+  // The first stack entry is at 4, since search looks in the past 4 plies
+  const auto root_stack = &stack_[4];
   root_stack->best_move = Move::NullMove();
 
   const int config_depth = time_mgmt_.GetConfig().depth;
@@ -77,7 +77,7 @@ void Search::IterativeDeepening() {
         // alpha
         alpha = std::max(-kInfiniteScore, alpha - window);
       } else if (score >= beta) {
-        // We failed hard on a pv node, which is abnormal and requires further
+        // We failed hard on a PV node, which is abnormal and requires further
         // verification allows the search to explore further without cutting off
         // early
         beta = std::min(kInfiniteScore, beta + window);
@@ -100,7 +100,7 @@ void Search::IterativeDeepening() {
       const bool is_mate = eval::IsMateScore(score);
       std::cout << std::format(
                        "info depth {} seldepth {} {} {} nodes {} time {} nps "
-                       "{} pv {}",
+                       "{} PV {}",
                        depth,
                        sel_depth_,
                        is_mate ? "mate" : "cp",
@@ -134,7 +134,7 @@ Score Search::QuiescentSearch(int alpha, int beta, SearchStack *stack) {
 
   // A principal variation (PV) node is a node that falls between the [alpha,
   // beta] window and one which most child moves are searched during the pv
-  // search. We attempt to guess which moves will be pv or non-pv nodes and
+  // search. We attempt to guess which moves will be PV or non-pv nodes and
   // re-search depending on if we were wrong
   constexpr bool in_pv_node = node_type != NodeType::kNonPV;
 
@@ -240,7 +240,7 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
 
   // A principal variation (PV) node is a node that falls between the [alpha,
   // beta] window and one which most child moves are searched during the pv
-  // search. We attempt to guess which moves will be pv or non-pv nodes and
+  // search. We attempt to guess which moves will be PV or non-pv nodes and
   // re-search depending on if we were wrong
   constexpr bool in_pv_node = node_type != NodeType::kNonPV;
   // The root node is also a PV node by default
@@ -403,7 +403,7 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
 
     transposition_table.Prefetch(board_.PredictKeyAfter(move));
 
-    // Ensure that the pv only contains moves down this path
+    // Ensure that the PV only contains moves down this path
     if (in_pv_node) {
       (stack + 1)->pv.Clear();
     }
@@ -444,7 +444,7 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     }
 
     // Either the move has potential from a reduced depth search or it's not
-    // expected to be a pv move hence, we search it with a null window
+    // expected to be a PV move hence, we search it with a null window
     if (needs_full_search) {
       score =
           -PVSearch<NodeType::kNonPV>(new_depth, -alpha - 1, -alpha, stack + 1);
@@ -475,7 +475,7 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
       if (score > alpha) {
         stack->best_move = best_move = move;
 
-        // Only update the pv line if this node was expected to be in the pv
+        // Only update the PV line if this node was expected to be in the pv
         if (in_pv_node) {
           stack->pv.Clear();
           stack->pv.Push(best_move);
