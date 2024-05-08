@@ -25,7 +25,8 @@ Search::Search(Board &board)
   }
 
   for (int i = 0; i < stack_.size(); i++) {
-    stack_[i] = SearchStack(i);
+    // First four search stacks are "padding" for histories
+    stack_[i] = SearchStack(std::max(0, i - 4));
   }
 }
 
@@ -131,7 +132,7 @@ Score Search::QuiescentSearch(int alpha, int beta, SearchStack *stack) {
 
   const auto &state = board_.GetState();
 
-  // A principal variation (pv) node is a node that falls between the [alpha,
+  // A principal variation (PV) node is a node that falls between the [alpha,
   // beta] window and one which most child moves are searched during the pv
   // search. We attempt to guess which moves will be pv or non-pv nodes and
   // re-search depending on if we were wrong
@@ -230,19 +231,19 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     depth++;
   }
 
-  // Search until a quiet position is found to Evaluate when we've searched to
+  // Search until a quiet position is found to evaluate when we've searched to
   // the depth limit
   assert(depth >= 0);
   if (depth == 0) {
     return QuiescentSearch<node_type>(alpha, beta, stack);
   }
 
-  // A principal variation (pv) node is a node that falls between the [alpha,
+  // A principal variation (PV) node is a node that falls between the [alpha,
   // beta] window and one which most child moves are searched during the pv
   // search. We attempt to guess which moves will be pv or non-pv nodes and
   // re-search depending on if we were wrong
   constexpr bool in_pv_node = node_type != NodeType::kNonPV;
-  // The root node is also a pv node by default
+  // The root node is also a PV node by default
   const bool in_root = stack->ply == 0;
 
   if (!in_root) {
@@ -261,7 +262,7 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
     }
   }
 
-  // Probe the transposition table to see if we have already Evaluated this
+  // Probe the transposition table to see if we have already evaluated this
   // position
   const auto &tt_entry = transposition_table.Probe(state.zobrist_key);
   const bool tt_hit = tt_entry.CompareKey(state.zobrist_key);
@@ -293,9 +294,9 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
       eval = stack->static_eval;
     }
 
-    if (stack->ply >= 2 && (stack - 2)->static_eval != kScoreNone) {
+    if ((stack - 2)->static_eval != kScoreNone) {
       improving = stack->static_eval > (stack - 2)->static_eval;
-    } else if (stack->ply >= 4 && (stack - 4)->static_eval != kScoreNone) {
+    } else if ((stack - 4)->static_eval != kScoreNone) {
       improving = stack->static_eval > (stack - 4)->static_eval;
     }
   } else {
@@ -489,7 +490,6 @@ Score Search::PVSearch(int depth, int alpha, int beta, SearchStack *stack) {
                 move, bad_quiets, state.turn, depth, stack);
             move_history_.UpdateKillerMove(move, stack->ply);
           }
-
           // Beta cutoff: The opponent had a better move earlier in the tree
           break;
         }
@@ -564,7 +564,8 @@ const TimeManagement &Search::GetTimeManagement() {
 
 void Search::NewGame() {
   for (int i = 0; i < stack_.size(); i++) {
-    stack_[i] = SearchStack(i);
+    // First four search stacks are "padding" for histories
+    stack_[i] = SearchStack(std::max(0, i - 4));
   }
   transposition_table.Clear();
   move_history_.Clear();
